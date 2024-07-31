@@ -1,0 +1,78 @@
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import java.util.Random;
+public class HazelcastPerformanceTest {
+    public static void main(String[] args) {
+        HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance();
+        IMap<Integer, Integer> map = hazelcastInstance.getMap("numbers");
+
+        // Insert 20,000 random numbers
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            map.put(i, new Random().nextInt());
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("20,000 put time: " + (endTime - startTime) + " ms");
+
+        // Get 20,000 random numbers
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            map.get(new Random().nextInt(20000));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("20,000 get time: " + (endTime - startTime) + " ms");
+
+        // Insert 100,000 random numbers
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) {
+            map.put(i, new Random().nextInt());
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("100,000 put time: " + (endTime - startTime) + " ms");
+
+        // Get 100,000 random numbers
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) {
+            map.get(new Random().nextInt(100000));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("100,000 get time: " + (endTime - startTime) + " ms");
+
+        hazelcastInstance.shutdown();     } } 
+
+
+
+CREATE TABLE random_numbers (
+    id NUMBER PRIMARY KEY,
+    value NUMBER
+);
+
+-- Insert 20,000 random numbers
+SET TIMING ON;
+BEGIN
+    FOR i IN 1..20000 LOOP
+        INSERT INTO random_numbers (id, value) VALUES (i, DBMS_RANDOM.VALUE);
+    END LOOP;
+    COMMIT;
+END;
+/
+-- Measure the time it takes to select 20,000 random numbers
+SET TIMING ON;
+SELECT * FROM random_numbers WHERE ROWNUM <= 20000;
+
+-- Insert 100,000 random numbers
+SET TIMING ON;
+BEGIN
+    FOR i IN 1..100000 LOOP
+        INSERT INTO random_numbers (id, value) VALUES (i, DBMS_RANDOM.VALUE);
+    END LOOP;
+    COMMIT;
+END;
+/
+-- Measure the time it takes to select 100,000 random numbers
+SET TIMING ON;
+SELECT * FROM random_numbers WHERE ROWNUM <= 100000;
+
+
+
